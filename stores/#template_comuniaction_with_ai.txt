@@ -1,0 +1,127 @@
+src/services/[context]Service.ts
+import { axiosInstance } from "../utils/axiosInstance"
+
+const baseURL = "/[context]"
+
+export const getAllUsers = (page = 1, limit = 10) =>
+  axiosInstance.get(`${baseURL}?page=${page}&limit=${limit}`)
+
+export const getUserById = (id: number | string) =>
+  axiosInstance.get(`${baseURL}/${id}`)
+
+export const createUser = (data: any) =>
+  axiosInstance.post(baseURL, data)
+
+export const updateUser = (id: number | string, data: any) =>
+  axiosInstance.put(`${baseURL}/${id}`, data)
+
+export const deleteUser = (id: number | string) =>
+  axiosInstance.delete(`${baseURL}/${id}`)
+
+src/stores/userStore.ts
+import { create } from "zustand"
+import {
+  getAll[Context]s,
+  get[Context]ById,
+  create[Context],
+  update[Context],
+  delete[Context],
+} from "../services/[context]sService"
+
+interface [Context] {
+  id: number
+  name: string
+  email: string
+  role: "admin" | "user"
+  // ...add fields as needed
+}
+
+interface [Context]Store {
+  data: [Context][]
+  current[Context]: [Context] | null
+  loading: boolean
+  error: string | null
+  page: number
+  limit: number
+  totalData: number
+
+  loadAll: (page?: number, limit?: number) => Promise<void>
+  getOne: (id: number) => Promise<void>
+  addOne: (payload: Partial<[Context]>) => Promise<void>
+  updateOne: (id: number, payload: Partial<[Context]>) => Promise<void>
+  deleteOne: (id: number) => Promise<void>
+}
+
+export const use[Context]Store = create<[Context]Store>((set) => ({
+  data: [],
+  current[Context]: null,
+  loading: false,
+  error: null,
+  page: 1,
+  limit: 10,
+  totalData: 0,
+
+  loadAll: async (page = 1, limit = 10) => {
+    set({ loading: true, error: null })
+    try {
+      const res = await getAll[Context]s(page, limit)
+      const { data, totalData } = res.data
+      set({ data, totalData, page, limit, loading: false })
+    } catch (err: any) {
+      set({ error: err.response.data.message, loading: false })
+    }
+  },
+
+  getOne: async (id) => {
+    set({ loading: true, error: null })
+    try {
+      const res = await get[Context]ById(id)
+      set({ current[Context]: res.data.data, loading: false })
+    } catch (err: any) {
+      set({ error: err.response.data.message, loading: false })
+    }
+  },
+
+  addOne: async (payload) => {
+    set({ loading: true, error: null })
+    try {
+      await create[Context](payload)
+      await use[Context]Store.getState().loadAll()
+    } catch (err: any) {
+      set({ error: err.response.data.message, loading: false })
+    }
+  },
+
+  updateOne: async (id, payload) => {
+    set({ loading: true, error: null })
+    try {
+      await update[Context](id, payload)
+      await use[Context]Store.getState().loadAll()
+    } catch (err: any) {
+      set({ error: err.response.data.message, loading: false })
+    }
+  },
+
+  deleteOne: async (id) => {
+    set({ loading: true, error: null })
+    try {
+      await delete[Context](id)
+      await use[Context]Store.getState().loadAll()
+    } catch (err: any) {
+      set({ error: err.response.data.message, loading: false })
+    }
+  },
+}))
+
+
+
+
+Buatkan struktur folder dan isi file untuk REST API resource berikut:
+
+Resource/Context: `products`  
+Primary Key: `id`  
+Fields:   
+Gunakan base Axios instance dari `@/utils/axiosInstance.ts`  
+Gunakan Zustand untuk state dengan: `data`, `currentItem`, `loading`, `error`, `page`, `limit`, `totalData`  
+Fungsi: loadAll, getOne, addOne, updateOne, deleteOne  
+Buat 2 file: service (axios) dan store (zustand)
