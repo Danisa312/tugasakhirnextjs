@@ -81,7 +81,7 @@ const AddEditKategoriPengeluaranForm: React.FC<AddEditKategoriPengeluaranProps> 
 
   return (
     <div>
-      <Button auto onClick={handler}>
+      <Button auto onClick={handler} css={{ background: '#b91c1c', color: '#fff', fontWeight: 600 }}>
         {buttonLabel || (isEditMode ? "Edit Kategori" : "Tambah Kategori")}
       </Button>
       <Modal
@@ -132,7 +132,7 @@ const AddEditKategoriPengeluaranForm: React.FC<AddEditKategoriPengeluaranProps> 
         </Modal.Body>
         <Divider css={{ my: "$5" }} />
         <Modal.Footer>
-          <Button auto onClick={handleSubmit} disabled={loading}>
+          <Button auto onClick={handleSubmit} disabled={loading} css={{ background: '#b91c1c', color: '#fff', fontWeight: 600 }}>
             {loading ? "Menyimpan..." : isEditMode ? "Update Kategori" : "Simpan"}
           </Button>
         </Modal.Footer>

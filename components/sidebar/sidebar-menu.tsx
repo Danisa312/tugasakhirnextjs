@@ -17,6 +17,7 @@ export const SidebarMenu = ({title, children}: Props) => {
             css={{
                letterSpacing: '0.04em',
                lineHeight: '$xs',
+               color: '#e3f0fa',
             }}
          >
             {title}

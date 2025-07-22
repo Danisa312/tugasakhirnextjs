@@ -53,7 +53,7 @@ export const useLaporanBulananStore = create<LaporanBulananState>((set) => ({
   addOne: async (payload) => {
     set({ loading: true });
     try {
-      const result = await laporanBulananService.addOne(payload);
+      const result = await laporanBulananService.addOne(payload as any);
       set((state) => ({
         data: [
           ...state.data,
@@ -79,7 +79,7 @@ export const useLaporanBulananStore = create<LaporanBulananState>((set) => ({
   updateOne: async (id, payload) => {
     set({ loading: true });
     try {
-      const result = await laporanBulananService.updateOne(id, payload);
+      const result = await laporanBulananService.updateOne(id, payload as any);
       set((state) => ({
         data: state.data.map((item) =>
           item.id === id

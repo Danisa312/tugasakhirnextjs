@@ -10,6 +10,7 @@ export interface User {
   role: string;
   created_at: string;
   updated_at: string;
+  password?: string;
 }
 
 interface UserStore {

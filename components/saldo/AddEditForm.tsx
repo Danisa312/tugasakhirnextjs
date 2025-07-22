@@ -6,6 +6,8 @@ import InputSelect from "../input/InputSelect";
 import { useToast } from "../toast/ToastProvider";
 import { Saldo, useSaldoStore } from "../../stores/saldoStore";
 import { axiosInstance } from "../../utils/axiosInstance";
+import { usePendapatanStore } from "../../stores/pendapatanStore";
+import { usePengeluaranStore } from "../../stores/pengeluaranStore";
 
 interface AddEditSaldoProps {
   initialData?: Saldo | null;
@@ -29,7 +31,9 @@ const AddEditSaldoForm: React.FC<AddEditSaldoProps> = ({
     saldo_akhir: undefined,
   });
 
-  const { addOne, updateOne, loading } = useSaldoStore();
+  const { addOne, updateOne, loading, loadAll, page, limit } = useSaldoStore();
+  const pendapatanStore = usePendapatanStore();
+  const pengeluaranStore = usePengeluaranStore();
 
   const handler = () => setVisible(true);
   const closeHandler = () => {
@@ -40,10 +44,11 @@ const AddEditSaldoForm: React.FC<AddEditSaldoProps> = ({
   // Reset form saat modal dibuka
   useEffect(() => {
     if (visible) {
+      let tanggal = initialData?.tanggal || "";
       if (initialData) {
         setForm({
           id: initialData.id || undefined,
-          tanggal: initialData.tanggal || "",
+          tanggal: tanggal,
           saldo_awal: initialData.saldo_awal || 0,
           total_pendapatan: initialData.total_pendapatan || 0,
           total_pengeluaran: initialData.total_pengeluaran || 0,
@@ -52,7 +57,7 @@ const AddEditSaldoForm: React.FC<AddEditSaldoProps> = ({
       } else {
         setForm({
           id: undefined,
-          tanggal: "",
+          tanggal: tanggal,
           saldo_awal: 0,
           total_pendapatan: 0,
           total_pengeluaran: 0,
@@ -61,6 +66,26 @@ const AddEditSaldoForm: React.FC<AddEditSaldoProps> = ({
       }
     }
   }, [visible, initialData]);
+
+  // Update total pendapatan/pengeluaran dan saldo akhir saat tanggal atau saldo_awal berubah
+  useEffect(() => {
+    if (!visible) return;
+    if (!form.tanggal) return;
+    // Filter data pendapatan dan pengeluaran sesuai tanggal
+    const tanggal = form.tanggal;
+    const totalPendapatan = pendapatanStore.data
+      .filter((item) => item.tanggal === tanggal)
+      .reduce((sum, item) => sum + (item.jumlah || 0), 0);
+    const totalPengeluaran = pengeluaranStore.data
+      .filter((item) => item.tanggal === tanggal)
+      .reduce((sum, item) => sum + (item.jumlah || 0), 0);
+    setForm((prev) => ({
+      ...prev,
+      total_pendapatan: totalPendapatan,
+      total_pengeluaran: totalPengeluaran,
+      saldo_akhir: Number(prev.saldo_awal || 0) + totalPendapatan - totalPengeluaran,
+    }));
+  }, [form.tanggal, form.saldo_awal, pendapatanStore.data, pengeluaranStore.data, visible]);
 
   const handleChange = (e: any) => {
     const { name, value } = e.target;
@@ -71,6 +96,7 @@ const AddEditSaldoForm: React.FC<AddEditSaldoProps> = ({
     try {
       const payload = {
         ...form,
+        tanggal: form.tanggal ? form.tanggal.slice(0, 10) : '',
         saldo_awal: Number(form.saldo_awal) || 0,
         total_pendapatan: Number(form.total_pendapatan) || 0,
         total_pengeluaran: Number(form.total_pengeluaran) || 0,
@@ -83,6 +109,7 @@ const AddEditSaldoForm: React.FC<AddEditSaldoProps> = ({
         await addOne(payload);
         showToast("Berhasil menambahkan saldo", "success");
       }
+      loadAll(page, limit);
       closeHandler();
     } catch (error: any) {
       const message =
@@ -93,7 +120,7 @@ const AddEditSaldoForm: React.FC<AddEditSaldoProps> = ({
 
   return (
     <div>
-      <Button auto onClick={handler}>
+      <Button auto onClick={handler} css={{ background: '#b91c1c', color: '#fff', fontWeight: 600 }}>
         {buttonLabel || (isEditMode ? "Edit Saldo" : "Tambah Saldo")}
       </Button>
       <Modal
@@ -146,43 +173,40 @@ const AddEditSaldoForm: React.FC<AddEditSaldoProps> = ({
               label="Total Pendapatan"
               name="total_pendapatan"
               type="number"
-              clearable
               bordered
               fullWidth
               size="lg"
               placeholder="Masukkan total pendapatan"
               value={form.total_pendapatan?.toString() || ""}
-              onChange={handleChange}
+              readOnly
             />
             <Input
               label="Total Pengeluaran"
               name="total_pengeluaran"
               type="number"
-              clearable
               bordered
               fullWidth
               size="lg"
               placeholder="Masukkan total pengeluaran"
               value={form.total_pengeluaran?.toString() || ""}
-              onChange={handleChange}
+              readOnly
             />
             <Input
               label="Saldo Akhir"
               name="saldo_akhir"
               type="number"
-              clearable
               bordered
               fullWidth
               size="lg"
               placeholder="Masukkan saldo akhir"
               value={form.saldo_akhir?.toString() || ""}
-              onChange={handleChange}
+              readOnly
             />
           </Flex>
         </Modal.Body>
         <Divider css={{ my: "$5" }} />
         <Modal.Footer>
-          <Button auto onClick={handleSubmit} disabled={loading}>
+          <Button auto onClick={handleSubmit} disabled={loading} css={{ background: '#b91c1c', color: '#fff', fontWeight: 600 }}>
             {loading ? "Menyimpan..." : isEditMode ? "Perbarui Saldo" : "Tambah Saldo"}
           </Button>
         </Modal.Footer>

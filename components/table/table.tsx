@@ -239,8 +239,8 @@ export const TableWrapper = ({
               ))}
             </Table.Row>
           ) : data.length > 0 ? (
-            data.map((item) => (
-              <Table.Row key={item.id || item.uid}>
+            data.map((item, index) => (
+              <Table.Row key={`${item.originalType || ''}-${item.id || item.uid || index}`}>
                 {columns.map((column) => (
                   <Table.Cell key={column.uid}>
                     {column.render

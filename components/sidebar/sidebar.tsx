@@ -94,12 +94,6 @@ export const SidebarWrapper = () => {
                         href="laporan_bulanan "
                      />
 
-                      <SidebarItem
-                        isActive={router.pathname === '/settings'}
-                        title="Settings"
-                        icon={<SettingsIcon />}
-                        href="settings "
-                     />
                      
 
                   </SidebarMenu>

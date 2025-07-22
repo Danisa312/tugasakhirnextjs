@@ -92,7 +92,7 @@ const AddEditUserForm: React.FC<AddEditUserProps> = ({
 
   return (
     <div>
-      <Button auto onClick={handler}>
+      <Button auto onClick={handler} css={{ background: '#b91c1c', color: '#fff', fontWeight: 600, borderRadius: 12, fontSize: 16, px: 24, py: 10, boxShadow: '0 2px 8px rgba(185,28,28,0.10)' }}>
         {buttonLabel || (isEditMode ? "Edit User" : "Add User")}
       </Button>
       <Modal
@@ -181,7 +181,7 @@ const AddEditUserForm: React.FC<AddEditUserProps> = ({
         </Modal.Body>
         <Divider css={{ my: "$5" }} />
         <Modal.Footer>
-          <Button auto onClick={handleSubmit} disabled={loading}>
+          <Button auto onClick={handleSubmit} disabled={loading} css={{ background: '#b91c1c', color: '#fff', fontWeight: 600, borderRadius: 12, fontSize: 16, px: 24, py: 10, boxShadow: '0 2px 8px rgba(185,28,28,0.10)' }}>
             {loading ? "Saving..." : isEditMode ? "Update User" : "Add User"}
           </Button>
         </Modal.Footer>

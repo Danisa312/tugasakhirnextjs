@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useCallback } from "react";
+import React, { useEffect, useMemo, useCallback, useState } from "react";
 import { Button, Text } from "@nextui-org/react";
 import Link from "next/link";
 import { Flex } from "../styles/flex";
@@ -9,6 +9,8 @@ import { useConfirmationToast } from "../toast/ConfirmationToast";
 import { Edit, Trash2, Eye, HouseIcon, ShoppingCartIcon } from "lucide-react";
 import { Breadcrumbs, Crumb, CrumbLink } from "../breadcrumb/breadcrumb.styled";
 import { usePendapatanStore } from "../../stores/pendapatanStore";
+import jsPDF from 'jspdf';
+import autoTable from 'jspdf-autotable';
 
 export const Pendapatan = () => {
   const {
@@ -24,6 +26,19 @@ export const Pendapatan = () => {
 
   const { showToast } = useToast();
   const { showToast: showConfirmationToast } = useConfirmationToast();
+
+  const [search, setSearch] = useState("");
+
+  // Filter data sesuai pencarian
+  const filteredData = useMemo(() => {
+    if (!search) return data;
+    return data.filter(item =>
+      (item.sumber && item.sumber.toLowerCase().includes(search.toLowerCase())) ||
+      (item.keterangan && item.keterangan.toLowerCase().includes(search.toLowerCase())) ||
+      (item.tanggal && item.tanggal.toLowerCase().includes(search.toLowerCase())) ||
+      (item.jumlah && item.jumlah.toString().includes(search))
+    );
+  }, [data, search]);
 
   const handleLoadData = useCallback(
     (params: {
@@ -55,6 +70,32 @@ export const Pendapatan = () => {
     );
   };
 
+  const handlePrintPDF = () => {
+    const doc = new jsPDF();
+    doc.text('Data Pendapatan', 14, 16);
+    autoTable(doc, {
+      head: [[
+        'User', 'Tanggal', 'Sumber', 'Jumlah', 'Metode Pembayaran', 'Keterangan'
+      ]],
+      body: data.map((item: any) => [
+        item.user?.name || '-',
+        item.tanggal || '-',
+        item.sumber || '-',
+        item.jumlah || '-',
+        item.metode_pembayaran || '-',
+        item.keterangan || '-'
+      ]),
+      startY: 20,
+    });
+    doc.save('pendapatan.pdf');
+  };
+
+  function formatRupiah(num: number | string) {
+    const n = Number(num);
+    if (isNaN(n)) return '-';
+    return n.toLocaleString('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 });
+  }
+
   const columns: Column[] = useMemo(
     () => [
       {
@@ -79,7 +120,7 @@ export const Pendapatan = () => {
         name: "JUMLAH",
         uid: "jumlah",
         sortable: true,
-        render: (pendapatan) => <>{pendapatan.jumlah}</>
+        render: (pendapatan) => <>{formatRupiah(pendapatan.jumlah)}</>
       },
       {
         name: "METODE PEMBAYARAN",
@@ -109,6 +150,7 @@ export const Pendapatan = () => {
               auto
               aria-label={`Delete ${item.sumber}`}
               onClick={() => handleDelete(item)}
+              css={{ background: '#b91c1c', color: '#fff', fontWeight: 600 }}
             >
               <Trash2 size={16} />
             </Button>
@@ -138,6 +180,7 @@ export const Pendapatan = () => {
       justify={"center"}
       direction={"column"}
     >
+      {/* Breadcrumb tetap di atas */}
       <Breadcrumbs>
         <Crumb>
           <HouseIcon />
@@ -155,31 +198,45 @@ export const Pendapatan = () => {
           <CrumbLink href="#">List</CrumbLink>
         </Crumb>
       </Breadcrumbs>
-      <Flex
-        css={{
-          gap: "$8",
-        }}
-        align={"center"}
-        justify={"between"}
-        wrap={"wrap"}
-      >
-        <Text h3>All Pendapatan</Text>
-        <Flex direction={"row"} css={{ gap: "$6" }} wrap={"wrap"}>
-          <AddEditPendapatanForm />
+      {/* Baris kedua: judul+show entries di kiri, search+tombol di kanan (seperti pengeluaran) */}
+      <Flex css={{ alignItems: 'flex-start', justifyContent: 'space-between', mb: 0, mt: 0 }}>
+        <Flex direction="row" align="center" css={{ gap: 16 }}>
+          <Text h3 css={{ mb: 0, marginBottom: 0 }}>All Pendapatan</Text>
+          {/* Komponen show entries dari TableWrapper akan otomatis berada di bawah ini jika TableWrapper mendukung slot/children, jika tidak, styling CSS pada .nextui-table-pagination-info agar naik ke atas */}
+        </Flex>
+        <Flex direction="column" align="end" css={{ gap: 6 }}>
+          <Flex align="center" css={{ margin: 0 }}>
+            <label htmlFor="search-pendapatan" style={{ marginRight: 8 }}>Search:</label>
+            <input
+              id="search-pendapatan"
+              type="text"
+              placeholder="Cari pendapatan..."
+              value={search}
+              onChange={e => setSearch(e.target.value)}
+              style={{ padding: 5, width: 250 }}
+            />
+          </Flex>
+          <Flex direction="row" css={{ gap: 16, marginTop: 6 }}>
+            <AddEditPendapatanForm />
+            <Button auto color="primary" onClick={handlePrintPDF} style={{ minWidth: 120, background: '#b91c1c', color: '#fff', fontWeight: 600 }}>
+              Cetak PDF
+            </Button>
+          </Flex>
         </Flex>
       </Flex>
+      {/* ...judul, table, dst... */}
       <TableWrapper
         columns={columns}
-        data={data}
+        data={filteredData}
         loading={loading}
-        totalItems={totalData}
+        totalItems={filteredData.length}
         onDataChange={handleLoadData}
         limitOptions={[5, 10, 15, 25]}
         defaultLimit={limit}
         defaultPage={page}
         defaultSortField="id"
         defaultSortDirection="asc"
-        ariaLabel="Pendapatan management table"
+        ariaLabel="Pendapatan table"
         showLimitSelector={true}
         showPagination={true}
         showSorting={false}

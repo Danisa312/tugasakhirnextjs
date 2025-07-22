@@ -1,7 +1,9 @@
 import {styled} from '@nextui-org/react';
 
 export const SidebarWrapper = styled('div', {
-   'backgroundColor': '$background',
+   'background': '#660000',
+   'borderRadius': '18px',
+   'boxShadow': '0 4px 24px rgba(0,0,0,0.12)',
    'transition': 'transform 0.2s ease',
    'height': '100%',
    'position': 'fixed',
@@ -13,9 +15,8 @@ export const SidebarWrapper = styled('div', {
    '&::-webkit-scrollbar': {
       display: 'none',
    },
-   'borderRight': '1px solid $border',
    'flexDirection': 'column',
-   'py': '$10',
+   'py': '0px',
    'px': '$6',
    '@md': {
       marginLeft: '0',
@@ -53,17 +54,15 @@ export const Header = styled('div', {
    display: 'flex',
    gap: '$8',
    alignItems: 'center',
-   // 'justifyContent': 'center',
-   px: '$10',
+   px: '$4',
 });
 
 export const Body = styled('div', {
    display: 'flex',
    flexDirection: 'column',
    gap: '$10',
-   mt: '$13',
+   mt: '0',
    px: '$4',
-   // pt: '$4',
 });
 
 export const Footer = styled('div', {

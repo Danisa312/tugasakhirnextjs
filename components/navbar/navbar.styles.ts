@@ -24,7 +24,7 @@ export const StyledBurgerButton = styled('button', {
    '& div': {
       'width': '22px',
       'height': '1px',
-      'background': '$accents9',
+      'background': '#fff',
       'borderRadius': '10px',
       'transition': 'all 0.3s ease',
       'position': 'relative',

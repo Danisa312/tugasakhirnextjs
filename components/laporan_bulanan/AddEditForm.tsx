@@ -111,7 +111,7 @@ const AddEditLaporanBulananForm: React.FC<AddEditLaporanBulananProps> = ({
 
   return (
     <div>
-      <Button auto onClick={handler}>
+      <Button auto onClick={handler} css={{ background: '#b91c1c', color: '#fff', fontWeight: 600 }}>
         {buttonLabel || (isEditMode ? "Edit Report" : "Add Report")}
       </Button>
       <Modal
@@ -142,7 +142,7 @@ const AddEditLaporanBulananForm: React.FC<AddEditLaporanBulananProps> = ({
                 id="bulan-select"
                 name="bulan"
                 value={form.bulan}
-                onChange={e => setForm(prev => ({ ...prev, bulan: Number(e.target.value) }))}
+                onChange={e => setForm(prev => ({ ...prev, bulan: `${Number(e.target.value)}`}))}
                 style={{ width: '100%', padding: '10px', borderRadius: '8px', border: '1px solid #ccc', fontSize: '16px', marginTop: '4px', marginBottom: '8px' }}
               >
                 <option value="">Pilih Bulan</option>
@@ -226,7 +226,7 @@ const AddEditLaporanBulananForm: React.FC<AddEditLaporanBulananProps> = ({
         </Modal.Body>
         <Divider css={{ my: "$5" }} />
         <Modal.Footer>
-          <Button auto onClick={handleSubmit} disabled={loading}>
+          <Button auto onClick={handleSubmit} disabled={loading} css={{ background: '#b91c1c', color: '#fff', fontWeight: 600 }}>
             {loading ? "Saving..." : isEditMode ? "Update Report" : "Add Report"}
           </Button>
         </Modal.Footer>

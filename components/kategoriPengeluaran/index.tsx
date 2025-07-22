@@ -92,6 +92,7 @@ export const KategoriPengeluaran = () => {
               auto
               aria-label={`Hapus ${kategori.nama}`}
               onClick={() => handleDelete(kategori)}
+              css={{ background: '#b91c1c', color: '#fff', fontWeight: 600 }}
             >
               <Trash2 size={16} />
             </Button>

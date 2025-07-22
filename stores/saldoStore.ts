@@ -70,3 +70,5 @@ export const useSaldoStore = create<SaldoState>((set) => ({
     }
   },
 }));
+
+export type { Saldo } from '../services/saldoService';

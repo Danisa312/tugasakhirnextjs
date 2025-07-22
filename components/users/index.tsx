@@ -97,6 +97,7 @@ export const Users = () => {
               auto
               aria-label={`Delete ${user.name}`}
               onClick={() => handleDelete(user)}
+              css={{ background: '#b91c1c', color: '#fff', fontWeight: 600 }}
             >
               <Trash2 size={16} />
             </Button>

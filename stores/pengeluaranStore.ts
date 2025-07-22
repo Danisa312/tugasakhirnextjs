@@ -9,6 +9,7 @@ export interface Pengeluaran {
   metode_pembayaran: string;
   penerima: string;
   keterangan: string;
+  kategori_id: number; // kolom kategori pengeluaran
 }
 interface PengeluaranState {
   data: Pengeluaran[];

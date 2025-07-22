@@ -182,7 +182,7 @@ const AddEditPengeluaranForm: React.FC<AddEditPengeluaranProps> = ({
 
   return (
     <div>
-      <Button auto onClick={handler}>
+      <Button auto onClick={handler} css={{ background: '#b91c1c', color: '#fff', fontWeight: 600 }}>
         {buttonLabel || (isEditMode ? "Edit Pengeluaran" : "Tambah Pengeluaran")}
       </Button>
       <Modal
@@ -318,12 +318,8 @@ const AddEditPengeluaranForm: React.FC<AddEditPengeluaranProps> = ({
         </Modal.Body>
         <Divider css={{ my: "$5" }} />
         <Modal.Footer>
-          <Button auto onClick={handleSubmit} disabled={loading}>
-            {loading
-              ? "Menyimpan..."
-              : isEditMode
-              ? "Perbarui Pengeluaran"
-              : "Simpan Pengeluaran"}
+          <Button auto onClick={handleSubmit} disabled={loading} css={{ background: '#b91c1c', color: '#fff', fontWeight: 600 }}>
+            {loading ? "Menyimpan..." : isEditMode ? "Perbarui Pengeluaran" : "Simpan Pengeluaran"}
           </Button>
         </Modal.Footer>
       </Modal>

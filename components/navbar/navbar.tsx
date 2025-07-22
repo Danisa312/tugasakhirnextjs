@@ -4,6 +4,7 @@ import {SearchIcon} from '../icons/searchicon';
 import {Box} from '../styles/box';
 import {BurguerButton} from './burguer-button';
 import { UserDropdown } from './user-dropdown';
+import { useRouter } from 'next/router';
 
 interface Props {
    children: React.ReactNode;
@@ -11,6 +12,7 @@ interface Props {
 
 export const NavbarWrapper = ({children}: Props) => {
    const [namaUser, setNamaUser] = useState('User');
+   const router = useRouter();
    const collapseItems = [
       'Profile',
       'Dashboard',
@@ -23,6 +25,23 @@ export const NavbarWrapper = ({children}: Props) => {
       'Help & Feedback',
       'Log Out',
    ];
+
+   // Mapping path ke judul menu
+   const pathToTitle: Record<string, string> = {
+      '/': 'Dashboard',
+      '/users': 'User',
+      '/pendapatan': 'Pendapatan',
+      '/pengeluaran': 'Pengeluaran',
+      '/saldo': 'Saldo',
+      '/settings': 'Settings',
+      '/laporan_bulanan': 'Laporan Bulanan',
+      '/KategoriPengeluaran': 'Kategori Pengeluaran',
+      '/accounts': 'Accounts',
+      // tambahkan mapping lain jika ada
+   };
+   const pageTitle = pathToTitle[router.pathname] || 'Dashboard';
+
+   const isDashboard = router.pathname === '/';
 
    useEffect(() => {
       if (typeof window !== 'undefined') {
@@ -55,6 +74,7 @@ export const NavbarWrapper = ({children}: Props) => {
                'borderBottom': '1px solid $border',
                'justifyContent': 'space-between',
                'width': '100%',
+               'background': '#800000',
                '@md': {
                   justifyContent: 'space-between',
                },
@@ -63,6 +83,7 @@ export const NavbarWrapper = ({children}: Props) => {
                   'border': 'none',
                   'maxWidth': '100%',
                   'gap': '$6',
+                  'background': '#800000',
                   '@md': {
                      justifyContent: 'space-between',
                   },
@@ -73,19 +94,20 @@ export const NavbarWrapper = ({children}: Props) => {
                <BurguerButton />
             </Navbar.Content>
             <div style={{ width: '100%', padding: '10px 0 0 32px', background: 'transparent' }}>
-               <span style={{
-                  fontSize: '1.45rem',
-                  fontWeight: 700,
-                  color: '#666',
+               <div style={{
+                  fontSize: pageTitle.toLowerCase() === 'dashboard' ? '1.5rem' : '2rem',
+                  fontWeight: 500,
+                  color: '#fff',
                   margin: 0,
                   padding: 0,
                   display: 'block',
                   lineHeight: 1.2,
-                  letterSpacing: 0.1,
+                  letterSpacing: 0.5,
                   textAlign: 'left',
+                  fontFamily: 'Segoe UI, Arial, sans-serif',
                }}>
-                  Selamat Datang, {namaUser}
-               </span>
+                  {pageTitle.charAt(0).toUpperCase() + pageTitle.slice(1).toLowerCase()}
+               </div>
             </div>
             <Navbar.Content
                hideIn={'md'}
