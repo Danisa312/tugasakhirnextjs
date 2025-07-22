@@ -1,7 +1,7 @@
 import axios from "axios";
 
-export const API_URL = "http://localhost:8000/api"
-export const PUBLIC_URL = "http://localhost:8000"
+export const API_URL = "https://sistem-keuangan.lantanajayadigital.cloud/api"
+export const PUBLIC_URL = "https://sistem-keuangan.lantanajayadigital.cloud"
 
 const axiosInstance = axios.create({
   baseURL: API_URL,
