@@ -10,28 +10,24 @@ import { useConfirmationToast } from "../toast/ConfirmationToast";
 import { Edit, Trash2, Eye, HouseIcon, ShoppingCartIcon } from "lucide-react";
 import { Breadcrumbs, Crumb, CrumbLink } from "../breadcrumb/breadcrumb.styled";
 import { usePengeluaranStore } from "../../stores/pengeluaranStore";
-import { useKategoriPengeluaranStore } from '../../stores/kategoriPengeluaranStore';
-import jsPDF from 'jspdf';
-import autoTable from 'jspdf-autotable';
+import { useKategoriPengeluaranStore } from "../../stores/kategoriPengeluaranStore";
+import jsPDF from "jspdf";
+import autoTable from "jspdf-autotable";
 import { SearchIcon } from "../icons/searchicon";
 
 function formatRupiah(num: number) {
   const n = Number(num);
-  if (isNaN(n)) return '-';
-  return n.toLocaleString('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 });
+  if (isNaN(n)) return "-";
+  return n.toLocaleString("id-ID", {
+    style: "currency",
+    currency: "IDR",
+    minimumFractionDigits: 0,
+  });
 }
 
 export const Pengeluaran = () => {
-  const {
-    data,
-    loading,
-    error,
-    totalData,
-    page,
-    limit,
-    loadAll,
-    deleteOne,
-  } = usePengeluaranStore();
+  const { data, loading, error, totalData, page, limit, loadAll, deleteOne } =
+    usePengeluaranStore();
   const { showToast } = useToast();
   const { showToast: showConfirmationToast } = useConfirmationToast();
 
@@ -56,12 +52,19 @@ export const Pengeluaran = () => {
   // Filter data sesuai pencarian
   const filteredData = useMemo(() => {
     if (!search) return data;
-    return data.filter(item =>
-      (item.penerima && item.penerima.toLowerCase().includes(search.toLowerCase())) ||
-      (item.keterangan && item.keterangan.toLowerCase().includes(search.toLowerCase())) ||
-      (item.tanggal && item.tanggal.toLowerCase().includes(search.toLowerCase())) ||
-      (item.metode_pembayaran && item.metode_pembayaran.toLowerCase().includes(search.toLowerCase())) ||
-      (item.jumlah && item.jumlah.toString().includes(search))
+    return data.filter(
+      (item) =>
+        (item.penerima &&
+          item.penerima.toLowerCase().includes(search.toLowerCase())) ||
+        (item.keterangan &&
+          item.keterangan.toLowerCase().includes(search.toLowerCase())) ||
+        (item.tanggal &&
+          item.tanggal.toLowerCase().includes(search.toLowerCase())) ||
+        (item.metode_pembayaran &&
+          item.metode_pembayaran
+            .toLowerCase()
+            .includes(search.toLowerCase())) ||
+        (item.jumlah && item.jumlah.toString().includes(search))
     );
   }, [data, search]);
 
@@ -97,22 +100,29 @@ export const Pengeluaran = () => {
 
   const handlePrintPDF = () => {
     const doc = new jsPDF();
-    doc.text('Data Pengeluaran', 14, 16);
+    doc.text("Data Pengeluaran", 14, 16);
     autoTable(doc, {
-      head: [[
-        'User', 'Tanggal', 'Jumlah', 'Metode Pembayaran', 'Penerima', 'Keterangan'
-      ]],
+      head: [
+        [
+          "User",
+          "Tanggal",
+          "Jumlah",
+          "Metode Pembayaran",
+          "Penerima",
+          "Keterangan",
+        ],
+      ],
       body: data.map((item: any) => [
-        item.user_id || '-',
-        item.tanggal || '-',
-        item.jumlah || '-',
-        item.metode_pembayaran || '-',
-        item.penerima || '-',
-        item.keterangan || '-'
+        item.user_id || "-",
+        item.tanggal || "-",
+        item.jumlah || "-",
+        item.metode_pembayaran || "-",
+        item.penerima || "-",
+        item.keterangan || "-",
       ]),
       startY: 20,
     });
-    doc.save('pengeluaran.pdf');
+    doc.save("pengeluaran.pdf");
   };
 
   const columns: Column[] = useMemo(
@@ -157,7 +167,13 @@ export const Pengeluaran = () => {
         name: "KATEGORI PENGELUARAN",
         uid: "kategori_pengeluaran",
         sortable: false,
-        render: (pengeluaran: any) => <>{kategoriMap.get(pengeluaran.kategori_id) || '-'}</>,
+        render: (pengeluaran: any) => (
+          <>
+            {kategoriMap.get(pengeluaran.kategori_id) ||
+              pengeluaran.kategori.nama ||
+              "-"}
+          </>
+        ),
       },
       {
         name: "ACTIONS",
@@ -175,7 +191,7 @@ export const Pengeluaran = () => {
               auto
               aria-label={`Delete ${pengeluaran.id}`}
               onClick={() => handleDelete(pengeluaran)}
-              css={{ background: '#b91c1c', color: '#fff', fontWeight: 600 }}
+              css={{ background: "#b91c1c", color: "#fff", fontWeight: 600 }}
             >
               <Trash2 size={16} />
             </Button>
@@ -224,26 +240,47 @@ export const Pengeluaran = () => {
         </Crumb>
       </Breadcrumbs>
       {/* Baris kedua: judul+show entries di kiri, search+tombol di kanan (seperti pendapatan) */}
-      <Flex css={{ alignItems: 'flex-start', justifyContent: 'space-between', mb: 0, mt: 0 }}>
+      <Flex
+        css={{
+          alignItems: "flex-start",
+          justifyContent: "space-between",
+          mb: 0,
+          mt: 0,
+        }}
+      >
         <Flex direction="row" align="center" css={{ gap: 16 }}>
-          <Text h3 css={{ mb: 0, marginBottom: 0 }}>All Pengeluaran</Text>
+          <Text h3 css={{ mb: 0, marginBottom: 0 }}>
+            All Pengeluaran
+          </Text>
           {/* Komponen show entries dari TableWrapper akan otomatis berada di bawah ini jika TableWrapper mendukung slot/children, jika tidak, styling CSS pada .nextui-table-pagination-info agar naik ke atas */}
         </Flex>
         <Flex direction="column" align="end" css={{ gap: 6 }}>
           <Flex align="center" css={{ margin: 0 }}>
-            <label htmlFor="search-pengeluaran" style={{ marginRight: 8 }}>Search:</label>
+            <label htmlFor="search-pengeluaran" style={{ marginRight: 8 }}>
+              Search:
+            </label>
             <input
               id="search-pengeluaran"
               type="text"
               placeholder="Cari pengeluaran..."
               value={search}
-              onChange={e => setSearch(e.target.value)}
+              onChange={(e) => setSearch(e.target.value)}
               style={{ padding: 5, width: 250 }}
             />
           </Flex>
           <Flex direction="row" css={{ gap: 16, marginTop: 6 }}>
             <AddEditPengeluaranForm />
-            <Button auto color="primary" onClick={handlePrintPDF} style={{ minWidth: 120, background: '#b91c1c', color: '#fff', fontWeight: 600 }}>
+            <Button
+              auto
+              color="primary"
+              onClick={handlePrintPDF}
+              style={{
+                minWidth: 120,
+                background: "#b91c1c",
+                color: "#fff",
+                fontWeight: 600,
+              }}
+            >
               Cetak PDF
             </Button>
           </Flex>
