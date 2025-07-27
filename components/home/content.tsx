@@ -98,15 +98,15 @@ export function Content() {
     } catch {}
 
     if (userRole === 'direktur') {
-      // Hanya fetch summary (dummy, ganti sesuai kebutuhan API Anda)
+      
       fetch('/api/dashboard-summary')
         .then(res => res.json())
         .then(data => {
-          // Set data summary ke state sesuai kebutuhan
+          
           setTotalSaldo(data.totalSaldo || 0);
           setTotalPendapatan(data.totalPendapatan || 0);
           setTotalPengeluaran(data.totalPengeluaran || 0);
-          // Kosongkan chart dan transaksi jika tidak ada data detail
+         
           setChartSeries([
             { name: 'Pendapatan', data: [] },
             { name: 'Pengeluaran', data: [] },

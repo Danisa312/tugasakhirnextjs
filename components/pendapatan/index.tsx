@@ -1,42 +1,70 @@
-import React, { useEffect, useMemo, useCallback, useState } from "react";
+// /components/pengeluaran/index.tsx
 import { Button, Text } from "@nextui-org/react";
 import Link from "next/link";
+import React, { useEffect, useMemo, useCallback, useState } from "react";
 import { Flex } from "../styles/flex";
 import { TableWrapper, type Column } from "../table/table";
-import AddEditPendapatanForm from "./AddEditForm";
+import AddEditPengeluaranForm from "./AddEditForm";
 import { useToast } from "../toast/ToastProvider";
 import { useConfirmationToast } from "../toast/ConfirmationToast";
 import { Edit, Trash2, Eye, HouseIcon, ShoppingCartIcon } from "lucide-react";
 import { Breadcrumbs, Crumb, CrumbLink } from "../breadcrumb/breadcrumb.styled";
-import { usePendapatanStore } from "../../stores/pendapatanStore";
-import jsPDF from 'jspdf';
-import autoTable from 'jspdf-autotable';
+import { usePengeluaranStore } from "../../stores/pengeluaranStore";
+import { useKategoriPengeluaranStore } from "../../stores/kategoriPengeluaranStore";
+import jsPDF from "jspdf";
+import autoTable from "jspdf-autotable";
+import { SearchIcon } from "../icons/searchicon";
 
-export const Pendapatan = () => {
-  const {
-    data,
-    loading,
-    error,
-    totalData,
-    page,
-    limit,
-    loadAll,
-    deleteOne,
-  } = usePendapatanStore();
+function formatRupiah(num: number) {
+  const n = Number(num);
+  if (isNaN(n)) return "-";
+  return n.toLocaleString("id-ID", {
+    style: "currency",
+    currency: "IDR",
+    minimumFractionDigits: 0,
+  });
+}
 
+export const Pengeluaran = () => {
+  const { data, loading, error, totalData, page, limit, loadAll, deleteOne } =
+    usePengeluaranStore();
   const { showToast } = useToast();
   const { showToast: showConfirmationToast } = useConfirmationToast();
 
+  const kategoriStore = useKategoriPengeluaranStore();
+  const kategoriMap = useMemo(() => {
+    const map = new Map();
+    kategoriStore.data.forEach((k) => {
+      map.set(k.id, k.nama);
+    });
+    return map;
+  }, [kategoriStore.data]);
+
+  useEffect(() => {
+    if (kategoriStore.data.length === 0) {
+      kategoriStore.loadAll(1, 100);
+    }
+  }, []);
+
   const [search, setSearch] = useState("");
+  // Hapus state showSearch dan tombol search icon
 
   // Filter data sesuai pencarian
   const filteredData = useMemo(() => {
     if (!search) return data;
-    return data.filter(item =>
-      (item.sumber && item.sumber.toLowerCase().includes(search.toLowerCase())) ||
-      (item.keterangan && item.keterangan.toLowerCase().includes(search.toLowerCase())) ||
-      (item.tanggal && item.tanggal.toLowerCase().includes(search.toLowerCase())) ||
-      (item.jumlah && item.jumlah.toString().includes(search))
+    return data.filter(
+      (item) =>
+        (item.penerima &&
+          item.penerima.toLowerCase().includes(search.toLowerCase())) ||
+        (item.keterangan &&
+          item.keterangan.toLowerCase().includes(search.toLowerCase())) ||
+        (item.tanggal &&
+          item.tanggal.toLowerCase().includes(search.toLowerCase())) ||
+        (item.metode_pembayaran &&
+          item.metode_pembayaran
+            .toLowerCase()
+            .includes(search.toLowerCase())) ||
+        (item.jumlah && item.jumlah.toString().includes(search))
     );
   }, [data, search]);
 
@@ -52,16 +80,16 @@ export const Pendapatan = () => {
     [loadAll]
   );
 
-  const handleDelete = (item: any) => {
+  const handleDelete = (pengeluaran: any) => {
     showConfirmationToast(
-      `Are you sure you want to delete "${item.sumber}"? This action cannot be undone.`,
+      Are you sure you want to delete pengeluaran "${pengeluaran.id}"? This action cannot be undone.,
       "error",
       {
         confirmLabel: "Delete",
         cancelLabel: "Cancel",
         onConfirm: async () => {
-          await deleteOne(item.id);
-          showToast("Success delete pendapatan", "success");
+          await deleteOne(pengeluaran.id);
+          showToast("Success delete pengeluaran", "success");
         },
         onCancel: () => {
           console.log("Penghapusan dibatalkan");
@@ -72,85 +100,98 @@ export const Pendapatan = () => {
 
   const handlePrintPDF = () => {
     const doc = new jsPDF();
-    doc.text('Data Pendapatan', 14, 16);
+    doc.text("Data Pengeluaran", 14, 16);
     autoTable(doc, {
-      head: [[
-        'User', 'Tanggal', 'Sumber', 'Jumlah', 'Metode Pembayaran', 'Keterangan'
-      ]],
+      head: [
+        [
+          "User",
+          "Tanggal",
+          "Jumlah",
+          "Metode Pembayaran",
+          "Penerima",
+          "Keterangan",
+        ],
+      ],
       body: data.map((item: any) => [
-        item.user?.name || '-',
-        item.tanggal || '-',
-        item.sumber || '-',
-        item.jumlah || '-',
-        item.metode_pembayaran || '-',
-        item.keterangan || '-'
+        item.user_id || "-",
+        item.tanggal || "-",
+        item.jumlah || "-",
+        item.metode_pembayaran || "-",
+        item.penerima || "-",
+        item.keterangan || "-",
       ]),
       startY: 20,
     });
-    doc.save('pendapatan.pdf');
+    doc.save("pengeluaran.pdf");
   };
-
-  function formatRupiah(num: number | string) {
-    const n = Number(num);
-    if (isNaN(n)) return '-';
-    return n.toLocaleString('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 });
-  }
 
   const columns: Column[] = useMemo(
     () => [
       {
         name: "USER",
-        uid: "user.name",
+        uid: "user",
         sortable: true,
-        render: (pendapatan) => <>{pendapatan.user.name}</>
+        render: (pengeluaran: any) => <>{pengeluaran.user_id}</>,
       },
       {
         name: "TANGGAL",
         uid: "tanggal",
         sortable: true,
-        render: (pendapatan) => <>{pendapatan.tanggal}</>
-      },
-      {
-        name: "SUMBER",
-        uid: "sumber",
-        sortable: true,
-        render: (pendapatan) => <>{pendapatan.sumber}</>
+        render: (pengeluaran: any) => <>{pengeluaran.tanggal}</>,
       },
       {
         name: "JUMLAH",
         uid: "jumlah",
         sortable: true,
-        render: (pendapatan) => <>{formatRupiah(pendapatan.jumlah)}</>
+        render: (pengeluaran: any) => <>{formatRupiah(pengeluaran.jumlah)}</>,
       },
       {
         name: "METODE PEMBAYARAN",
         uid: "metode_pembayaran",
-        sortable: false,
-        render: (pendapatan) => <>{pendapatan.metode_pembayaran}</>
+        sortable: true,
+        render: (pengeluaran: any) => <>{pengeluaran.metode_pembayaran}</>,
+      },
+      {
+        name: "PENERIMA",
+        uid: "penerima",
+        sortable: true,
+        render: (pengeluaran: any) => <>{pengeluaran.penerima}</>,
       },
       {
         name: "KETERANGAN",
         uid: "keterangan",
         sortable: false,
-        render: (pendapatan) => <>{pendapatan.keterangan}</>
+        render: (pengeluaran: any) => <>{pengeluaran.keterangan}</>,
+      },
+      {
+        name: "KATEGORI PENGELUARAN",
+        uid: "kategori_pengeluaran",
+        sortable: false,
+        render: (pengeluaran: any) => (
+          <>
+            {kategoriMap.get(pengeluaran.kategori_id) ||
+              pengeluaran.kategori.nama ||
+              "-"}
+          </>
+        ),
       },
       {
         name: "ACTIONS",
         uid: "action",
         sortable: false,
-        render: (item: any) => (
+        render: (pengeluaran: any) => (
           <div style={{ display: "flex", gap: 8 }}>
-            <AddEditPendapatanForm
-              initialData={item}
-              buttonLabel={<Edit size={16} />}
+            <AddEditPengeluaranForm
+              initialData={pengeluaran}
+              buttonLabel="Edit"
             />
             <Button
               size="md"
               color="error"
               auto
-              aria-label={`Delete ${item.sumber}`}
-              onClick={() => handleDelete(item)}
-              css={{ background: '#b91c1c', color: '#fff', fontWeight: 600 }}
+              aria-label={Delete ${pengeluaran.id}}
+              onClick={() => handleDelete(pengeluaran)}
+              css={{ background: "#b91c1c", color: "#fff", fontWeight: 600 }}
             >
               <Trash2 size={16} />
             </Button>
@@ -158,7 +199,7 @@ export const Pendapatan = () => {
         ),
       },
     ],
-    [handleDelete]
+    [handleDelete, kategoriMap]
   );
 
   useEffect(() => {
@@ -191,40 +232,60 @@ export const Pendapatan = () => {
         </Crumb>
         <Crumb>
           <ShoppingCartIcon />
-          <CrumbLink href="#">Pendapatan</CrumbLink>
+          <CrumbLink href="#">Pengeluaran</CrumbLink>
           <Text>/</Text>
         </Crumb>
         <Crumb>
           <CrumbLink href="#">List</CrumbLink>
         </Crumb>
       </Breadcrumbs>
-      {/* Baris kedua: judul+show entries di kiri, search+tombol di kanan (seperti pengeluaran) */}
-      <Flex css={{ alignItems: 'flex-start', justifyContent: 'space-between', mb: 0, mt: 0 }}>
+      {/* Baris kedua: judul+show entries di kiri, search+tombol di kanan (seperti pendapatan) */}
+      <Flex
+        css={{
+          alignItems: "flex-start",
+          justifyContent: "space-between",
+          mb: 0,
+          mt: 0,
+        }}
+      >
         <Flex direction="row" align="center" css={{ gap: 16 }}>
-          <Text h3 css={{ mb: 0, marginBottom: 0 }}>All Pendapatan</Text>
+          <Text h3 css={{ mb: 0, marginBottom: 0 }}>
+            All Pengeluaran
+          </Text>
           {/* Komponen show entries dari TableWrapper akan otomatis berada di bawah ini jika TableWrapper mendukung slot/children, jika tidak, styling CSS pada .nextui-table-pagination-info agar naik ke atas */}
         </Flex>
         <Flex direction="column" align="end" css={{ gap: 6 }}>
           <Flex align="center" css={{ margin: 0 }}>
-            <label htmlFor="search-pendapatan" style={{ marginRight: 8 }}>Search:</label>
+            <label htmlFor="search-pengeluaran" style={{ marginRight: 8 }}>
+              Search:
+            </label>
             <input
-              id="search-pendapatan"
+              id="search-pengeluaran"
               type="text"
-              placeholder="Cari pendapatan..."
+              placeholder="Cari pengeluaran..."
               value={search}
-              onChange={e => setSearch(e.target.value)}
+              onChange={(e) => setSearch(e.target.value)}
               style={{ padding: 5, width: 250 }}
             />
           </Flex>
           <Flex direction="row" css={{ gap: 16, marginTop: 6 }}>
-            <AddEditPendapatanForm />
-            <Button auto color="primary" onClick={handlePrintPDF} style={{ minWidth: 120, background: '#b91c1c', color: '#fff', fontWeight: 600 }}>
+            <AddEditPengeluaranForm />
+            <Button
+              auto
+              color="primary"
+              onClick={handlePrintPDF}
+              style={{
+                minWidth: 120,
+                background: "#b91c1c",
+                color: "#fff",
+                fontWeight: 600,
+              }}
+            >
               Cetak PDF
             </Button>
           </Flex>
         </Flex>
       </Flex>
-      {/* ...judul, table, dst... */}
       <TableWrapper
         columns={columns}
         data={filteredData}
@@ -236,11 +297,11 @@ export const Pendapatan = () => {
         defaultPage={page}
         defaultSortField="id"
         defaultSortDirection="asc"
-        ariaLabel="Pendapatan table"
+        ariaLabel="Pengeluaran table"
         showLimitSelector={true}
         showPagination={true}
         showSorting={false}
       />
-    </Flex>
-  );
+    </Flex>
+  );
 };
